@@ -18,16 +18,16 @@ import lombok.NoArgsConstructor;
 public class Book {
 	
 	@Id
-	@GeneratedValue(strategy=GenerationType.SEQUENCE)
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
 	private String title;
 	private String author;
-	private String isbn;
+	private Long isbn;
 	private String publisher;
 	private Long pages;
 	private String genre;
 	private Double price;
-	private Long stock;
+	private int stock;
 	private String image;
 	
 	@Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 1")
