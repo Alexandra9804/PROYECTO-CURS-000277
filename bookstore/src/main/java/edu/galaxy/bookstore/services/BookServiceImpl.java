@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import edu.galaxy.bookstore.constant.RecordStateConstant;
@@ -51,6 +53,23 @@ public class BookServiceImpl implements BookService {
 			return bookCustomMapper.toDTO(bookRepository.findByState(RecordStateConstant.ACTIVE));
 		}
 	}
+	
+	@Override
+	public Page<BookResponseDto> findByStateAndTitlelike(Boolean state, String title, Pageable pageable) {
+	    Optional<String> optionalName = Optional.ofNullable(title);
+
+	    Page<Book> bookPage;
+
+	    if (optionalName.isPresent()) {
+	        bookPage = bookRepository.findByStateAndTitleLike(RecordStateConstant.ACTIVE, "%" + title.trim() + "%", pageable);
+	    } else {
+	        bookPage = bookRepository.findByState(RecordStateConstant.ACTIVE, pageable);
+	    }
+
+	    return bookPage.map(book -> bookCustomMapper.toDTO(book));
+	}
+
+
 
 	@Override
 	public BookResponseDto save(BookRequestDto bookRequestDto) {
@@ -106,10 +125,5 @@ public class BookServiceImpl implements BookService {
 					
 				}).orElseThrow(() -> new RuntimeException("Book with id " + id + "not found"));
 	}
-
-	
-
-	
-	
 
 }
