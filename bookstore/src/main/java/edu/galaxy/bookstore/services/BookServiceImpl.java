@@ -4,65 +4,86 @@ package edu.galaxy.bookstore.services;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import edu.galaxy.bookstore.constant.RecordStateConstant;
+import edu.galaxy.bookstore.dtos.BookRequestDto;
+import edu.galaxy.bookstore.dtos.BookResponseDto;
 import edu.galaxy.bookstore.entities.Book;
+import edu.galaxy.bookstore.mappers.BookCustomMapper;
+import edu.galaxy.bookstore.mappers.BookCustomMapperImpl;
+import edu.galaxy.bookstore.mappers.BookMapper;
 import edu.galaxy.bookstore.repositories.BookRepository;
 
 @Service
 public class BookServiceImpl implements BookService {
 
 	private final BookRepository bookRepository;
+	private final BookCustomMapper bookCustomMapper;
 	
-	public BookServiceImpl(BookRepository bookRepository)
+	public BookServiceImpl(BookRepository bookRepository, BookCustomMapper bookCustomMapper)
 	{
 		this.bookRepository = bookRepository;
+		this.bookCustomMapper = bookCustomMapper;
 	}
 
 	@Override
-	public void saveAll(List<Book> books) {
-		 bookRepository.saveAll(books);
+	public void saveAll(List<BookRequestDto> books) {
+		
+		List<Book> booksEntity = books.stream()
+				.map(BookMapper.INSTANCE::convertToEntity)
+				 .peek(book -> book.setState(true)) 
+				.toList();
+		
+		 bookRepository.saveAll(booksEntity);
+		
 	}
 
 	@Override
-	public List<Book> findByStateAndTitlelike(Boolean state, String title) {
+	public List<BookResponseDto> findByStateAndTitlelike(Boolean state, String title) {
 		
 		Optional<String> optionalName = Optional.ofNullable(title);
 
 		if(optionalName.isPresent()) {
-			return bookRepository.findByStateAndTitleLike(RecordStateConstant.ACTIVE, "%" + title.trim() + "%");
+			return  bookCustomMapper.toDTO(bookRepository.findByStateAndTitleLike(RecordStateConstant.ACTIVE, "%" + title.trim() + "%"));
 		}else {
-			return bookRepository.findByState(RecordStateConstant.ACTIVE);
+			return bookCustomMapper.toDTO(bookRepository.findByState(RecordStateConstant.ACTIVE));
 		}
 	}
 
 	@Override
-	public Book save(Book book) {
+	public BookResponseDto save(BookRequestDto bookRequestDto) {
+		Book book = BookMapper.INSTANCE.convertToEntity(bookRequestDto);
 		book.setState(true);
-		return bookRepository.save(book);
+		book = this.bookRepository.save(book);
+		
+		return BookMapper.INSTANCE.convertToDto(book);
 	}
 
 	@Override
-	public Optional<Book> findByStateAndId(Boolean state, Long id) {
+	public Optional<BookResponseDto> findByStateAndId(Boolean state, Long id) {
 		Book book = bookRepository.findByStateAndId(RecordStateConstant.ACTIVE, id).orElseThrow(() -> new RuntimeException("Book not found"));
-		return Optional.ofNullable(book);
+		return Optional.ofNullable(bookCustomMapper.toDTO(book));
 	}
 
 	@Override
-	public Book update(Long id, Book book) {
+	public BookResponseDto update(Long id, BookRequestDto bookRequestDto) {
 		 return bookRepository.findByStateAndId(RecordStateConstant.ACTIVE, id)
 			        .map(bookToUpdate -> {
-			        	bookToUpdate.setTitle(book.getTitle());
-			        	bookToUpdate.setAuthor(book.getAuthor());
-			        	bookToUpdate.setIsbn(book.getIsbn());
-			        	bookToUpdate.setPublisher(book.getPublisher());
-			        	bookToUpdate.setPages(book.getPages());
-			        	bookToUpdate.setGenre(book.getGenre());
-			        	bookToUpdate.setPrice(book.getPrice());
-			        	bookToUpdate.setStock(book.getStock());
-			        	bookToUpdate.setImage(book.getImage());
-			            return bookRepository.save(bookToUpdate);
+			        	bookToUpdate.setTitle(bookRequestDto.title());
+			        	bookToUpdate.setAuthor(bookRequestDto.author());
+			        	bookToUpdate.setIsbn(bookRequestDto.isbn());
+			        	bookToUpdate.setPublisher(bookRequestDto.publisher());
+			        	bookToUpdate.setPages(bookRequestDto.pages());
+			        	bookToUpdate.setGenre(bookRequestDto.genre());
+			        	bookToUpdate.setPrice(bookRequestDto.price());
+			        	bookToUpdate.setStock(bookRequestDto.stock());
+			        	bookToUpdate.setImage(bookRequestDto.image());
+			        	
+			            Book updatedBook = bookRepository.save(bookToUpdate);
+			            
+			            return BookMapper.INSTANCE.convertToDto(updatedBook);
 			        })
 			        .orElseThrow(() -> new RuntimeException("Book with id " + id + " not found"));
 	}
@@ -75,11 +96,14 @@ public class BookServiceImpl implements BookService {
 	}
 
 	@Override
-	public Book updateStock(Long id, Book book) {
+	public BookResponseDto updateStock(Long id, BookRequestDto bookRequestDto) {
 		return bookRepository.findByStateAndId(RecordStateConstant.ACTIVE, id)
 				.map(bookStockToUpdate -> {
-					bookStockToUpdate.setStock(book.getStock());
-					return bookRepository.save(bookStockToUpdate);
+					bookStockToUpdate.setStock(bookRequestDto.stock());
+					Book updatedStockBook  = bookRepository.save(bookStockToUpdate);
+					
+					return BookMapper.INSTANCE.convertToDto(updatedStockBook);
+					
 				}).orElseThrow(() -> new RuntimeException("Book with id " + id + "not found"));
 	}
 

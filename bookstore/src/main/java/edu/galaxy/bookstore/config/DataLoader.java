@@ -7,6 +7,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import edu.galaxy.bookstore.dtos.BookRequestDto;
 import edu.galaxy.bookstore.entities.Book;
 import edu.galaxy.bookstore.services.BookService;
 import edu.galaxy.bookstore.utils.IsbnGenerator;
@@ -19,26 +20,25 @@ public class DataLoader {
 		return args -> {
 			final Integer COUNT = 10;
 			
-			List<Book> books = new ArrayList<>();
+			List<BookRequestDto> bookDtos = new ArrayList<>();
 			
 			for(int i = 1; i<=COUNT; i++) {
-				Book book = new Book();
-				book.setTitle("Title " + i);
-				book.setAuthor("Author " + i);
-				book.setIsbn(isbnGenerator.generateIsbn());
-				book.setPublisher("Publisher" + i);
-				book.setPages((long) i);
-				book.setGenre("Genre" + i);
-				book.setPrice((double) i);
-				book.setStock(i);
-				book.setImage("https://picsum.photos/300/200");
-				book.setState(true);
-				
-				books.add(book);
+				BookRequestDto bookDto = new BookRequestDto(
+						"Title " + i,
+						"Author " + i,
+						isbnGenerator.generateIsbn(),
+						"Publisher " + i,
+						(long) i,
+						"Genre " + i,	
+						(double) i,
+						i,
+						"https://picsum.photos/300/200"
+				);
+				bookDtos.add(bookDto);
 				
 			}
 			
-			bookService.saveAll(books);
+			bookService.saveAll(bookDtos);
 		};
 	}
 }

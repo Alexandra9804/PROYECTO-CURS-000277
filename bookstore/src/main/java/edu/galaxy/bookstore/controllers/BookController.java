@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import edu.galaxy.bookstore.constant.RecordStateConstant;
+import edu.galaxy.bookstore.dtos.BookRequestDto;
+import edu.galaxy.bookstore.dtos.BookResponseDto;
 import edu.galaxy.bookstore.entities.Book;
 import edu.galaxy.bookstore.services.BookService;
 
@@ -27,23 +29,23 @@ public class BookController {
 	private BookService bookService;
 	
 	@GetMapping
-	public List<Book> findAllOrFilterByTitle(@RequestParam(required=false) String title){
+	public List<BookResponseDto> findAllOrFilterByTitle(@RequestParam(required=false) String title){
 		return bookService.findByStateAndTitlelike(RecordStateConstant.ACTIVE, title);
 	}
 	
 	@PostMapping
-	public Book save(@RequestBody Book book) {
-		return bookService.save(book);
+	public BookResponseDto save(@RequestBody BookRequestDto bookRequestDto) {
+		return bookService.save(bookRequestDto);
 	}
 	
 	@GetMapping("/{id}")
-	public Optional<Book> findByStateAndId(@PathVariable Long id) {
+	public Optional<BookResponseDto> findByStateAndId(@PathVariable Long id) {
 		return bookService.findByStateAndId(RecordStateConstant.ACTIVE, id);
 	}
 	
 	@PutMapping("/{id}")
-	public Book update(@PathVariable Long id, @RequestBody Book book) {
-		return bookService.update(id, book);
+	public BookResponseDto update(@PathVariable Long id, @RequestBody BookRequestDto bookRequestDto) {
+		return bookService.update(id, bookRequestDto);
 	}
 	
 	@DeleteMapping("/{id}")
@@ -52,7 +54,7 @@ public class BookController {
 	}
 	
 	@PatchMapping("/{id}")
-	public Book updateStock(@PathVariable Long id, @RequestBody Book book) {
-		return bookService.updateStock(id, book);
+	public BookResponseDto updateStock(@PathVariable Long id, @RequestBody BookRequestDto bookRequestDto) {
+		return bookService.updateStock(id, bookRequestDto);
 	}
 }
