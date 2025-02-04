@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Lista de Libros</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+    <h1>Lista de Libros</h1>
+    
+    <form th:action="@{/}" method="get" style="margin-bottom: 20px;">
+        <label for="nombre">Buscar por titulo:</label>
+        <input type="text" id="title" name="title" th:value="${nombreBuscado}" placeholder="Escribe un nombre">
+        <button type="submit">Buscar</button>
+        <a th:href="@{/}" style="margin-left: 10px;">Limpiar búsqueda</a>
+    </form>
+
+    <div th:if="${#lists.isEmpty(books)}" style="color: red;">
+        <p>No se encontraron libros con ese nombre.</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Titulo</th>
+                <th>Autor</th>
+                <th>Isbn</th>
+                <th>Editora</th>
+                <th>Paginas</th>
+                <th>Genero</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Imagen</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="book : ${books}">
+                <td th:text="${book.id}"></td>
+                <td th:text="${book.title}"></td>
+                <td th:text="${book.author}"></td>
+                <td th:text="${book.isbn}"></td>
+                <td th:text="${book.publisher}"></td>
+                <td th:text="${book.pages}"></td>
+                <td th:text="${book.genre}"></td>
+                <td th:text="${book.price}"></td>
+                <td th:text="${book.stock}"></td>
+                <td>
+                    <img th:src="${book.image}" alt="Imagen del libro" style="max-width: 100px;">
+                </td>
+                <td>
+                    <a th:href="@{/{id}(id=${book.id})}">Ver Detalle</a>
+                    <a th:href="@{/editar/{id}(id=${book.id})}">Editar</a>
+                    <a th:href="@{/eliminar/{id}(id=${book.id})}">Borrar</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a th:href="@{/nuevo}" class="btn">Agregar Libro</a>
+</body>
+</html>
