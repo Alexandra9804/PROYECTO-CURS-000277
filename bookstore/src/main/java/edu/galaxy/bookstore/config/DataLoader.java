@@ -18,7 +18,7 @@ public class DataLoader {
 	@Bean
 	CommandLineRunner loadData(BookService bookService, IsbnGenerator isbnGenerator) {
 		return args -> {
-			final Integer COUNT = 10;
+			final Integer COUNT = 100;
 			
 			List<BookRequestDto> bookDtos = new ArrayList<>();
 			
@@ -32,7 +32,7 @@ public class DataLoader {
 						"Genre " + i,	
 						(double) i,
 						i,
-						"https://picsum.photos/300/200"
+						"https://picsum.photos/300/500"
 				);
 				bookDtos.add(bookDto);
 				

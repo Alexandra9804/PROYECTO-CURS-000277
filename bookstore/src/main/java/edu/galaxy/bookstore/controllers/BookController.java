@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import edu.galaxy.bookstore.constant.RecordStateConstant;
 import edu.galaxy.bookstore.dtos.BookRequestDto;
 import edu.galaxy.bookstore.dtos.BookResponseDto;
+import edu.galaxy.bookstore.dtos.PaginationResponseDto;
 import edu.galaxy.bookstore.entities.Book;
 import edu.galaxy.bookstore.services.BookService;
 
@@ -39,7 +40,7 @@ public class BookController {
 	}
 	
 	@GetMapping("/byPage")
-	public Page<BookResponseDto> findAllOrFilterByTitle(
+	public PaginationResponseDto<List<BookResponseDto>> findAllOrFilterByTitle(
 	    @RequestParam(required = false) String title,
 	    @RequestParam(defaultValue = "1") int pageNumber,
 	    @RequestParam(defaultValue = "10") int pageSize,
@@ -47,6 +48,7 @@ public class BookController {
 		@RequestParam(defaultValue = "ASC") String order
 	) {
 	    Pageable pageable = PageRequest.of(pageNumber-1, pageSize, Sort.by(Direction.valueOf(order), fields));
+	    
 	    return bookService.findByStateAndTitlelike(RecordStateConstant.ACTIVE, title, pageable);
 	}
 

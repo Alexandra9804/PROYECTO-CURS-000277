@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import edu.galaxy.bookstore.constant.RecordStateConstant;
 import edu.galaxy.bookstore.dtos.BookRequestDto;
 import edu.galaxy.bookstore.dtos.BookResponseDto;
+import edu.galaxy.bookstore.dtos.PageResponseDto;
+import edu.galaxy.bookstore.dtos.PaginationResponseDto;
 import edu.galaxy.bookstore.entities.Book;
 import edu.galaxy.bookstore.mappers.BookCustomMapper;
 import edu.galaxy.bookstore.mappers.BookCustomMapperImpl;
@@ -55,7 +57,7 @@ public class BookServiceImpl implements BookService {
 	}
 	
 	@Override
-	public Page<BookResponseDto> findByStateAndTitlelike(Boolean state, String title, Pageable pageable) {
+	public PaginationResponseDto<List<BookResponseDto>> findByStateAndTitlelike(Boolean state, String title, Pageable pageable) {
 	    Optional<String> optionalName = Optional.ofNullable(title);
 
 	    Page<Book> bookPage;
@@ -66,7 +68,21 @@ public class BookServiceImpl implements BookService {
 	        bookPage = bookRepository.findByState(RecordStateConstant.ACTIVE, pageable);
 	    }
 
-	    return bookPage.map(book -> bookCustomMapper.toDTO(book));
+
+	    List<BookResponseDto> bookResponseList = bookPage.stream()
+	            .map(bookCustomMapper::toDTO)
+	            .toList();
+
+
+	    return new PaginationResponseDto<>(
+	            bookResponseList,
+	            new PageResponseDto(
+	                    bookPage.getSize(),
+	                    bookPage.getTotalElements(),
+	                    bookPage.getTotalPages(),
+	                    (long) bookPage.getNumber()
+	            )
+	    );
 	}
 
 

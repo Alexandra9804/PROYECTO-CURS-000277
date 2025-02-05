@@ -1,26 +1,37 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
-<title>Detalle del Libro</title>
+    <meta charset="UTF-8">
+    <title>Detalle del Libro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-	<h1>Detalle del Libro</h1>
-	
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Detalle del Libro</h1>
+        <div class="card mx-auto shadow-lg" style="max-width: 800px;">
+            <div class="row g-0">
 
-    <p><strong>ID:</strong> <span th:text="${book.id}"></span></p>
-    <p><strong>Título:</strong> <span th:text="${book.title}"></span></p>
-    <p><strong>Autor:</strong> <span th:text="${book.author}"></span></p>
-    <p><strong>Isbn:</strong> <span th:text="${book.isbn}"></span></p>
-    <p><strong>Editora:</strong> $<span th:text="${book.publisher}"></span></p>
-    <p><strong>Páginas:</strong> $<span th:text="${book.pages}"></span></p>
-    <p><strong>Género:</strong> $<span th:text="${book.genre}"></span></p>
-    <p><strong>Precio:</strong> $<span th:text="${book.price}"></span></p>
-    <p><strong>Stock:</strong> $<span th:text="${book.stock}"></span></p>
-    <img th:src="${book.image}" alt="Imagen del libro" style="max-width: 200px;">
-    
+                <div class="col-md-4 d-flex justify-content-center align-items-center">
+                    <img th:src="${book.image}" alt="Imagen del libro" class="img-fluid rounded-start" style="max-height: 300px; object-fit: cover;">
+                </div>
+      
+                <div class="col-md-8">
+                    <div class="card-body">
+                         <p class="card-text"><strong>Título:</strong> <span th:text="${book.title}"></span></p>
+                        <p class="card-text"><strong>Autor:</strong> <span th:text="${book.author}"></span></p>
+                        <p class="card-text"><strong>ISBN:</strong> <span th:text="${book.isbn}"></span></p>
+                        <p class="card-text"><strong>Editora:</strong> <span th:text="${book.publisher}"></span></p>
+                        <p class="card-text"><strong>Páginas:</strong> <span th:text="${book.pages}"></span></p>
+                        <p class="card-text"><strong>Género:</strong> <span th:text="${book.genre}"></span></p>
+                        <p class="card-text"><strong>Precio:</strong> S/. <span th:text="${book.price}"></span></p>
+                        <p class="card-text"><strong>Stock:</strong> <span th:text="${book.stock}"></span></p>
+                        <a th:href="@{/paginado}" class="btn btn-primary mt-3">Volver a la Lista</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <a th:href="@{/}" class="btn">Lista de Libros</a>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

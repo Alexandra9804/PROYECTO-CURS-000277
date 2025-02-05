@@ -1,9 +1,13 @@
 package edu.galaxy.bookstore_client.controllers;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,6 +20,8 @@ import org.springframework.web.client.RestTemplate;
 
 import edu.galaxy.bookstore_client.dtos.BookRequestDTO;
 import edu.galaxy.bookstore_client.dtos.BookResponseDTO;
+import edu.galaxy.bookstore_client.dtos.PageResponseDTO;
+import edu.galaxy.bookstore_client.dtos.PaginationResponseDTO;
 
 @Controller
 public class BookController {
@@ -26,6 +32,7 @@ public class BookController {
 	public BookController(RestTemplateBuilder restTemplateBuilder) {
 		this.restTemplate = restTemplateBuilder.rootUri("").build();
 	}
+	
 	
 	@GetMapping
 	public String findAllOrFilterByTitle(@RequestParam(required = false) String title, Model model) {
@@ -40,6 +47,42 @@ public class BookController {
 		return "books";
 	}
 	
+	@GetMapping("/paginado")
+	public String findAllOrFilterByTitle(
+	    @RequestParam(required = false) String title,
+	    @RequestParam(defaultValue = "1") int pageNumber,
+	    @RequestParam(defaultValue = "10") int pageSize,
+	    @RequestParam(defaultValue = "id,title") String[] fields,
+	    @RequestParam(defaultValue = "DESC") String order,
+	    Model model
+	) {
+
+	    String url = apiUrl + "/byPage?title=" + (title != null ? title : "") 
+	                + "&pageNumber=" + pageNumber
+	                + "&pageSize=" + pageSize
+	                + "&fields=" + String.join(",", fields)
+	                + "&order=" + order;
+
+
+	    ResponseEntity<PaginationResponseDTO<List<BookResponseDTO>>> response = this.restTemplate.exchange(
+	        url,
+	        HttpMethod.GET,
+	        null,
+	        new ParameterizedTypeReference<PaginationResponseDTO<List<BookResponseDTO>>>() {}
+	    );
+
+	    PaginationResponseDTO<List<BookResponseDTO>> paginationResponse = response.getBody();
+
+
+	    model.addAttribute("books", paginationResponse.getContent());
+	    model.addAttribute("currentPage", paginationResponse.getPage().getNumber() + 1); 
+	    model.addAttribute("totalPages", paginationResponse.getPage().getTotalPages());
+	    model.addAttribute("title", title); 
+	    model.addAttribute("pageSize", pageSize);
+
+	    return "books"; 
+	}
+	
 	@GetMapping("/{id}")
 	public String findById(@PathVariable Long id, Model model) {
 		ResponseEntity<BookResponseDTO> book = this.restTemplate.getForEntity(this.apiUrl + '/' + id, BookResponseDTO.class);
@@ -49,7 +92,7 @@ public class BookController {
 	
 	@GetMapping("/nuevo")
 	public String showFormToRegister(Model model) {
-		model.addAttribute("book", new BookRequestDTO()); // Objeto vacío para el formulario
+		model.addAttribute("book", new BookRequestDTO()); 
         model.addAttribute("titulo", "Registrar Libro");
         model.addAttribute("action", "/guardar");
 		return "new-form";
@@ -58,7 +101,7 @@ public class BookController {
 	@PostMapping("/guardar")
 	public String save(BookRequestDTO bookRequestDTO) {
 		this.restTemplate.postForEntity(this.apiUrl, bookRequestDTO, BookRequestDTO.class);
-        return "redirect:/"; 
+        return "redirect:/paginado"; 
 	}
 	
     @GetMapping("/editar/{id}")
@@ -73,7 +116,7 @@ public class BookController {
     @PostMapping("/actualizar")
     public String update(BookRequestDTO bookRequestDTO) {
     	this.restTemplate.put(this.apiUrl + '/' + bookRequestDTO.getId(), bookRequestDTO);
-        return "redirect:/"; 
+        return "redirect:/paginado"; 
     }
     
     @GetMapping("/eliminar/{id}")
@@ -88,6 +131,6 @@ public class BookController {
     @PostMapping("/borrar")
     public String delete(@RequestParam Long id) {
     	this.restTemplate.delete(this.apiUrl + '/' + id);
-        return "redirect:/"; 
+        return "redirect:/paginado"; 
     }
 }
